@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.width = size;
         canvas.height = size;
 
-        cols = canvas.width / resolution;
-        rows = canvas.height / resolution;
+        cols = Math.floor(canvas.width / resolution);
+        rows = Math.floor(canvas.height / resolution);
 
         grid = buildGrid();
         randomizeGrid(grid);
