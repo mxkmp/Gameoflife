@@ -54,9 +54,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function computeNextGeneration() {
         const nextGenGrid = buildGrid();
-        for (let col = 0; col < cols; col++) {
-            for (let row = 0; row < rows; row++) {
-                const neighbors = countNeighbors(grid, col, row);
+
+        // Compute inner grid (no wrap-around needed)
+        for (let col = 1; col < cols - 1; col++) {
+            for (let row = 1; row < rows - 1; row++) {
+                let neighbors = 0;
+                neighbors += grid[col - 1][row - 1];
+                neighbors += grid[col - 1][row];
+                neighbors += grid[col - 1][row + 1];
+                neighbors += grid[col][row - 1];
+                neighbors += grid[col][row + 1];
+                neighbors += grid[col + 1][row - 1];
+                neighbors += grid[col + 1][row];
+                neighbors += grid[col + 1][row + 1];
+
                 const cell = grid[col][row];
                 if (cell === 1 && (neighbors < 2 || neighbors > 3)) {
                     nextGenGrid[col][row] = 0;
@@ -67,7 +78,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+
+        // Handle edges with modulo arithmetic
+        // Top and Bottom rows
+        for (let col = 0; col < cols; col++) {
+            computeCellWithWrap(col, 0, nextGenGrid);
+            computeCellWithWrap(col, rows - 1, nextGenGrid);
+        }
+
+        // Left and Right columns (skipping corners handled above)
+        for (let row = 1; row < rows - 1; row++) {
+            computeCellWithWrap(0, row, nextGenGrid);
+            computeCellWithWrap(cols - 1, row, nextGenGrid);
+        }
+
         return nextGenGrid;
+    }
+
+    function computeCellWithWrap(col, row, nextGenGrid) {
+        const neighbors = countNeighbors(grid, col, row);
+        const cell = grid[col][row];
+        if (cell === 1 && (neighbors < 2 || neighbors > 3)) {
+            nextGenGrid[col][row] = 0;
+        } else if (cell === 0 && neighbors === 3) {
+            nextGenGrid[col][row] = 1;
+        } else {
+            nextGenGrid[col][row] = cell;
+        }
     }
 
     function countNeighbors(grid, x, y) {
