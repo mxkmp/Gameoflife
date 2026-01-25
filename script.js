@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let cols;
     let rows;
     let grid;
+    let nextGrid;
     let animationId;
     let isRunning = false;
 
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rows = Math.floor(canvas.height / resolution);
 
         grid = buildGrid();
+        nextGrid = buildGrid();
         randomizeGrid(grid);
         drawGrid(grid);
     }
@@ -53,21 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function computeNextGeneration() {
-        const nextGenGrid = buildGrid();
         for (let col = 0; col < cols; col++) {
             for (let row = 0; row < rows; row++) {
                 const neighbors = countNeighbors(grid, col, row);
                 const cell = grid[col][row];
                 if (cell === 1 && (neighbors < 2 || neighbors > 3)) {
-                    nextGenGrid[col][row] = 0;
+                    nextGrid[col][row] = 0;
                 } else if (cell === 0 && neighbors === 3) {
-                    nextGenGrid[col][row] = 1;
+                    nextGrid[col][row] = 1;
                 } else {
-                    nextGenGrid[col][row] = cell;
+                    nextGrid[col][row] = cell;
                 }
             }
         }
-        return nextGenGrid;
     }
 
     function countNeighbors(grid, x, y) {
@@ -87,7 +87,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isRunning) {
             return;
         }
-        grid = computeNextGeneration();
+        computeNextGeneration();
+
+        // Swap grids
+        const temp = grid;
+        grid = nextGrid;
+        nextGrid = temp;
+
         drawGrid(grid);
         animationId = requestAnimationFrame(gameLoop);
     }
